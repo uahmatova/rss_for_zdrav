@@ -1,6 +1,3 @@
-pip install feedparser
-pip install --user beautifulsoup4
-
 import feedparser
 import datetime
 import requests
