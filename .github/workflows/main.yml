@@ -2,8 +2,8 @@ name: Update RSS Feed
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # Запуск каждые 5 минут
-  workflow_dispatch:         # Ручной запуск
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
   push:
     branches:
       - dev
@@ -29,19 +29,17 @@ jobs:
       run: pip install feedparser requests beautifulsoup4
 
     - name: Run RSS merger
+      env:
+        VK_TOKEN: ${{ secrets.VK_TOKEN }}
       run: python rss_merger.py
 
     - name: Prepare file for GitHub Pages
       run: |
-        # Создаём папку docs, если её нет
         mkdir -p docs
-        # Копируем созданный файл в папку docs
         cp merged_feed.xml docs/
-        # Добавляем файл в Git
         git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.email "github-actions[bot]@users.noreply.github.com"  # <-- ИСПРАВЛЕНО!
         git add docs/merged_feed.xml
-        # Коммитим, только если файл изменился
         git diff --staged --quiet || git commit -m "Обновлена RSS-лента [skip ci]"
 
     - name: Push changes to repository
