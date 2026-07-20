@@ -3,32 +3,71 @@ import requests
 import re
 import time
 from xml.etree import ElementTree as ET
+import os
+VK_TOKEN = os.getenv('VK_TOKEN')
 
 # --- НАСТРОЙКА ---
 VK_GROUPS = [
     "permkrai20",
     "minzdrav_permkrai",
+    "mahonindn",
+    'minzdravru',
+    'cozmp59',
+    'rpn_permkrai'
 ]
-VK_TOKEN = 'd0aba882d0aba882d0aba8829cd39c235edd0abd0aba882b82c14340f4c8b620425b030'
+
+#VK_TOKEN = 'd0aba882d0aba882d0aba8829cd39c235edd0abd0aba882b82c14340f4c8b620425b030'
 POSTS_PER_GROUP = 30
 DAYS_BACK = 7  # Брать посты только за последние 7 дней
 
-# --- ФУНКЦИЯ ОЧИСТКИ ---
-def clean_description(text):
+# --- ФУНКЦИЯ ВЫДЕЛЕНИЯ ПЕРВОГО ПРЕДЛОЖЕНИЯ ---
+def get_first_sentence(text):
+    """
+    Извлекает первое предложение из текста.
+    Предложение заканчивается на . ! ? или с новой строки.
+    """
     if not text:
         return ""
-    phrases_to_remove = [
-        'Подписывайтесь на нас в Telegram',
-        'Подписывайтесь на нас в Max',
-        'Подписывайтесь на нас в Telegram и Max',
-        'Подписывайтесь на нас в соцсетях',
-        'Читайте нас в Telegram',
-        'Подписывайтесь на нас в социальных сетях',
-    ]
-    for phrase in phrases_to_remove:
-        text = text.replace(phrase, '').strip()
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
+    
+    # Ищем первый знак конца предложения (. ! ?) или конец строки
+    # Ищем позицию первого из символов: . ! ? или \n
+    end_pos = -1
+    for symbol in ['.', '!', '?', '\n']:
+        pos = text.find(symbol)
+        if pos != -1:
+            if end_pos == -1 or pos < end_pos:
+                end_pos = pos
+    
+    if end_pos != -1:
+        # Берем текст до найденного символа + сам символ
+        first_sentence = text[:end_pos + 1].strip()
+        # Если это точка, и она часть числа (например, "1.5"), ищем дальше
+        if first_sentence.endswith('.') and len(first_sentence) > 1 and first_sentence[-2].isdigit():
+            # Пропускаем эту точку, ищем следующую
+            second_try = get_first_sentence(text[end_pos + 1:])
+            if second_try:
+                return first_sentence + ' ' + second_try
+        return first_sentence
+    else:
+        # Если нет знаков препинания, берем первые 100 символов
+        return text[:100].strip()
+
+# # --- ФУНКЦИЯ ОЧИСТКИ ОПИСАНИЯ ---
+# def clean_description(text):
+#     if not text:
+#         return ""
+#     phrases_to_remove = [
+#         'Подписывайтесь на нас в Telegram',
+#         'Подписывайтесь на нас в Max',
+#         'Подписывайтесь на нас в Telegram и Max',
+#         'Подписывайтесь на нас в соцсетях',
+#         'Читайте нас в Telegram',
+#         'Подписывайтесь на нас в социальных сетях',
+#     ]
+#     for phrase in phrases_to_remove:
+#         text = text.replace(phrase, '').strip()
+#     text = re.sub(r'\s+', ' ', text)
+#     return text.strip()
 
 # --- ФУНКЦИЯ ПОЛУЧЕНИЯ ПОСТОВ ---
 def fetch_vk_posts(group_id, token, count=30, days_back=7):
@@ -90,8 +129,14 @@ def fetch_vk_posts(group_id, token, count=30, days_back=7):
             
             pub_date = datetime.datetime.fromtimestamp(item['date']).strftime("%a, %d %b %Y %H:%M:%S +0500")
             post_link = f"https://vk.com/wall{item['owner_id']}_{item['id']}"
-            description = clean_description(text)
-            title = text[:100].strip() if text else "Пост из ВК"
+            
+            description = text
+            
+            # --- ФОРМИРУЕМ ЗАГОЛОВОК ИЗ ПЕРВОГО ПРЕДЛОЖЕНИЯ ---
+            title = get_first_sentence(text)
+            # Если заголовок получился слишком длинным, обрезаем до 150 символов
+            if len(title) > 150:
+                title = title[:150].strip() + "..."
             
             posts.append({
                 'title': title,
