@@ -14,7 +14,8 @@ VK_GROUPS = [
     'rpn_permkrai', 
     'gdkbpichugina',
     'diabet_expert',
-    'pkspkperm'
+    'pkspkperm',
+    'sanprosvet_rospotrebnadzor'
 ]
 
 #VK_TOKEN = 'd0aba882d0aba882d0aba8829cd39c235edd0abd0aba882b82c14340f4c8b620425b030'
