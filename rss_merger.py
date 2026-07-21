@@ -11,8 +11,7 @@ VK_GROUPS = [
     "minzdrav_permkrai",
     'minzdravru',
     'cozmp59',
-    'rpn_permkrai', 
-    'gdkbpichugina',
+    'rpn_permkrai',
     'diabet_expert',
     'pkspkperm',
     'sanprosvet_rospotrebnadzor'
