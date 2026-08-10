@@ -78,7 +78,7 @@ def fetch_vk_posts(group_id, token, count=30, days_back=7):
     try:
         threshold_time = int(time.time()) - days_back * 24 * 60 * 60
         
-        url = "https://api.vk.com/method/wall.get"
+        url = "https://api.vk.ru/method/wall.get"
         params = {
             "access_token": token,
             "v": "5.131",
@@ -131,7 +131,7 @@ def fetch_vk_posts(group_id, token, count=30, days_back=7):
                         image_url = link_photo.get("src_big") or link_photo.get("src")
             
             pub_date = datetime.datetime.fromtimestamp(item['date']).strftime("%a, %d %b %Y %H:%M:%S +0500")
-            post_link = f"https://vk.com/wall{item['owner_id']}_{item['id']}"
+            post_link = f"https://vk.ru/wall{item['owner_id']}_{item['id']}"
             
             description = text
             
