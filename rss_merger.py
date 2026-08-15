@@ -9,7 +9,7 @@ VK_TOKEN = os.getenv('VK_TOKEN')
 # --- НАСТРОЙКА ---
 VK_GROUPS = [
     "minzdrav_permkrai",
-    'minzdravru',
+    #'minzdravru',
     'cozmp59',
     'rpn_permkrai',
     'diabet_expert',
